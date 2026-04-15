@@ -1,0 +1,47 @@
+npm create vite@latest recipe_saver -- --template react
+npm install
+npm run dev
+
+# src/App.jsx:
+
+import './App.css'
+
+function App() {
+  return (
+    <main className="app">
+      <section className="hero">
+        <h1>Recipe Saver</h1>
+        <p>Save recipes from browser tabs into one organized place.</p>
+      </section>
+    </main>
+  )
+}
+
+export default App
+
+
+# src/App.css:
+
+.app {
+  min-height: 100vh;
+  padding: 3rem 1.5rem;
+  background-color: #f8f5f0;
+  color: #2f2a24;
+}
+
+.hero {
+  max-width: 700px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.hero h1 {
+  margin-bottom: 1rem;
+  font-size: 3rem;
+}
+
+.hero p {
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1.6;
+}

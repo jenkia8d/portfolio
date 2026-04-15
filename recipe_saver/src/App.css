@@ -1,0 +1,75 @@
+.app {
+  min-height: 100vh;
+  padding: 3rem 1.5rem;
+  background-color: #f8f5f0;
+  color: #2f2a24;
+}
+
+.hero {
+  max-width: 700px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.hero h1 {
+  margin-bottom: 1rem;
+  font-size: 3rem;
+}
+
+.hero p {
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+.actions {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.action-button {
+  padding: 0.75rem 1.25rem;
+  border: 1px solid #b8aa96;
+  border-radius: 999px;
+  background-color: #fffaf3;
+  color: #2f2a24;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.action-button:hover {
+  background-color: #efe3d1;
+}
+
+.recipe-form {
+  max-width: 600px;
+  margin: 2rem auto 0;
+  text-align: left;
+}
+
+.form-field {
+  margin-bottom: 1rem;
+}
+
+.form-field label {
+  display: block;
+  margin-bottom: 0.4rem;
+}
+
+.form-field input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #b8aa96;
+  border-radius: 0.5rem;
+  box-sizing: border-box;
+}
+
+.form-field textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #b8aa96;
+  border-radius: 0.5rem;
+  box-sizing: border-box;
+}
