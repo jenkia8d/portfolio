@@ -1,0 +1,35 @@
+SELECT 
+  array_index,
+  date_format(
+    report_time, 
+    'MM-dd HH:mm:ss'
+  ) AS report_time_formatted, 
+  regexp_replace(state, '^Inverter state: ', '') AS state,
+  length(regexp_replace(state, '^Inverter state: ', '')) as len_state,
+  ac_real_power_kw,
+  ac_frequency_hz,
+  event_vendor_1,
+  *
+FROM (
+  SELECT *,
+         ROW_NUMBER() OVER (
+           PARTITION BY array_index, 
+                        state, 
+                        unix_timestamp(report_time) - ROW_NUMBER() OVER (PARTITION BY array_index ORDER BY report_time)
+           ORDER BY report_time
+         ) AS seq_rn
+  FROM (
+    SELECT *,
+           LAG(state) OVER (PARTITION BY array_index ORDER BY report_time) AS prev_state
+    FROM array_pcs_report_view
+    WHERE station_code = 'HNL0072'
+      AND block_index = 1
+      -- AND report_time BETWEEN '2026-02-21 12:00:00' AND '2026-02-26 00:00:00'
+      AND report_time BETWEEN '2026-03-05 00:00:00' AND '2026-03-06 00:00:00'
+      -- AND date(report_time) = '2026-02-21' AND hour(report_time) >= 14
+      AND array_index IN (1)
+  ) x
+  WHERE prev_state IS NULL OR state <> prev_state
+) t
+WHERE seq_rn = 1
+ORDER BY report_time DESC, array_index

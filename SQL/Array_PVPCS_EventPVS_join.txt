@@ -1,0 +1,144 @@
+
+SELECT 
+  a.report_time_formatted,
+  b.EventPVS_gridExportMaxKW,
+  b.EventPVS_gridImportMaxKW,
+  b.EventPVS_batteryDischargeMaxKW,
+  b.EventPVS_batteryChargeMaxKW,
+  b.EventPVS_setPointKW,
+  b.eventpvs_setpointkw_offset2k,
+  b.EventPVS_mode,
+  
+  CASE 
+    WHEN b.EventPVS_mode = 'GRID' THEN 1000
+    WHEN b.EventPVS_mode = 'BATTERY' THEN 2000
+    WHEN b.EventPVS_mode = 'PVtoGrid' THEN 3000
+    WHEN b.EventPVS_mode = 'PVtoBattery' THEN 4000
+    ELSE NULL
+  END AS EventPVS_mode_num,
+  a.Array_p_array,
+  a.Array_max_discharge_p_array,
+  a.Array_max_charge_p_array,
+  c.PVPCS_sum_ac_real_power_kw,
+  c.PVPCS_sum_pv_dc_power_kw,
+  b.event_log_message,
+  a.Array_p_array - c.PVPCS_sum_ac_real_power_kw AS diff_KW
+  
+FROM (
+  SELECT 
+    date_format(
+      report_time, 
+      'MM-dd HH:mm:ss'
+    ) AS report_time_formatted, 
+    round(
+      -- sum(KW), 
+      sum(amps * dc_bus_voltage / 1000),
+      0
+    ) AS Array_p_array,
+    round(
+      -- sum(KW), 
+      sum(max_allowed_discharge_current * dc_bus_voltage / 1000),
+      0
+    ) AS Array_max_discharge_p_array,
+    round(
+      -- sum(KW), 
+      sum(-1 * max_allowed_charge_current * dc_bus_voltage / 1000),
+      0
+    ) AS Array_max_charge_p_array
+  FROM array_report_view
+  WHERE station_code = :1_station_code
+    AND block_index = :2_block_index 
+    AND report_time BETWEEN :start_time AND :time_end
+  GROUP BY report_time
+) a
+INNER JOIN (
+  SELECT 
+    date_format(
+      report_time, 
+      'MM-dd HH:mm:ss'
+    ) AS report_time_formatted,
+
+    try_cast(
+      regexp_extract(
+        event_log_message, 
+        'gridExportMaxKW\\s*:\\s*([0-9.]+)', 
+        1
+      ) AS double
+    ) AS EventPVS_gridExportMaxKW,
+
+    try_cast(
+      regexp_extract(
+        event_log_message, 
+        'gridImportMaxKW\\s*:\\s*([0-9.]+)', 
+        1
+      ) AS double
+    )*(-1) AS EventPVS_gridImportMaxKW,
+
+    try_cast(
+      regexp_extract(
+        event_log_message, 
+        'batteryDischargeMaxKW\\s*:\\s*([0-9.]+)', 
+        1
+      ) AS double
+    ) AS EventPVS_batteryDischargeMaxKW,
+
+     try_cast(
+      regexp_extract(
+        event_log_message, 
+        'batteryChargeMaxKW\\s*:\\s*([0-9.]+)', 
+        1
+      ) AS double
+    )*(-1) AS EventPVS_batteryChargeMaxKW,
+
+    try_cast(
+      regexp_extract(
+        event_log_message, 
+        'setPointKW\\s*:\\s*([0-9.]+)', 
+        1
+      ) AS double
+    ) AS EventPVS_setPointKW,
+
+    try_cast(
+      regexp_extract(
+        event_log_message, 
+        'setPointKW\\s*:\\s*([0-9.]+)', 
+        1
+      ) AS double
+    )+2000 AS EventPVS_setPointKW_offset2k,
+
+    regexp_extract(
+      event_log_message, 
+      'mode\\s*:\\s*([A-Z]+)', 
+      1
+    ) AS EventPVS_mode,
+    
+    event_log_message
+  FROM event_log_report_view
+  WHERE station_code = :1_station_code
+    AND block_index = :2_block_index 
+    AND report_time BETWEEN :start_time AND :time_end
+    AND event_log_message LIKE '%PVS0%'
+) b
+ON a.report_time_formatted = b.report_time_formatted
+LEFT JOIN (
+  SELECT 
+    date_format(
+      report_time, 
+      'MM-dd HH:mm:ss'
+    ) AS report_time_formatted, 
+    round(
+      sum(ac_real_power_kw), 
+      0
+    ) AS PVPCS_sum_ac_real_power_kw,
+    round(
+      sum(pv_dc_power_kw), 
+      0
+    ) AS PVPCS_sum_pv_dc_power_kw
+  FROM bess_prd.base_customer_all.pv_pcs_report_view
+  WHERE station_code = :1_station_code
+    AND block_index = :2_block_index 
+    AND report_time BETWEEN :start_time AND :time_end
+  GROUP BY report_time
+) c
+ON a.report_time_formatted = c.report_time_formatted
+ORDER BY a.report_time_formatted
