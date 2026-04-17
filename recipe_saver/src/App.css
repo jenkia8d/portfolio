@@ -31,7 +31,7 @@
 
 .action-button {
   padding: 0.75rem 1.25rem;
-  border: 1px solid #b8aa96;
+  border: 3px solid #b8aa96;
   border-radius: 999px;
   background-color: #fffaf3;
   color: #2f2a24;
@@ -41,6 +41,20 @@
 
 .action-button:hover {
   background-color: #efe3d1;
+}
+
+.recipe-name-button {
+  padding: 0.5rem 2rem;
+  border-radius: 999px;
+  background-color: #e6f4ff;
+  border: 2px solid #9ecdf2;
+  color: #1f4f75;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.recipe-name-button:hover {
+  background-color: #d7ecff;
 }
 
 .recipe-form {
@@ -73,3 +87,32 @@
   border-radius: 0.5rem;
   box-sizing: border-box;
 }
+
+.recipe-view-list {
+  margin-top: 0.75rem;
+}
+
+
+.recipe-view-actions {
+  margin-top: 1.5rem;
+}
+
+.recipe-detail {
+  max-width: 600px;
+  margin: 2rem auto 0;
+  text-align: left;
+}
+
+.recipe-detail ol {
+  padding-left: 1.5rem;
+}
+
+.recipe-detail li {
+  margin-bottom: 0.4rem;
+}
+
+.recipe-detail-actions {
+  margin-top: 2rem;
+  text-align: center;
+}
+
