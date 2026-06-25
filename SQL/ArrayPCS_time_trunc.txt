@@ -1,0 +1,18 @@
+WITH ranked AS (
+  SELECT
+    date_format(
+      report_time, 
+      'MM-dd HH:mm:ss'
+    ) AS report_time, state, in_rotation, is_ready,
+    ac_cmd_real_power_kw, ac_real_power_setting_kw, ac_real_power_kw, event_vendor_1,
+    ROW_NUMBER() OVER (PARTITION BY (date_trunc('hour', report_time) + (floor(minute(report_time)/:every_x_minutes) * :every_x_minutes * INTERVAL '1' MINUTE)) ORDER BY report_time) AS rn
+  FROM array_pcs_report_view
+  WHERE station_code = 'APE0060'
+    AND block_index = 1
+    AND array_index = :array_index
+    AND report_time BETWEEN '2026-01-20 00:00:00' AND '2026-01-27 00:00:00'
+)
+SELECT report_time, state, in_rotation, is_ready, ac_cmd_real_power_kw, ac_real_power_setting_kw, ac_real_power_kw, event_vendor_1
+FROM ranked
+WHERE rn = 1
+ORDER BY report_time
